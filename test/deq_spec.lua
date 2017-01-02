@@ -26,12 +26,8 @@ describe('Deque(Double-ended queue):', function()
             assert.are.equal( nil, deq.tail );
         end);
 
-        it('pool must be empty', function()
-            assert.are.same( {}, deq.pool );
-        end);
-
         it('used must be empty', function()
-            assert.are.same( {}, deq.pool );
+            assert.are.same( {}, deq.used );
         end);
     end);
 
@@ -133,43 +129,6 @@ describe('Deque(Double-ended queue):', function()
             assert.are.equal( 0, deq.len );
             assert.are.equal( nil, deq.head );
             assert.are.equal( nil, deq.tail );
-        end);
-    end);
-
-
-    describe('test a pool table -', function()
-        it('element object should be recycled', function()
-            local elm;
-
-            collectgarbage('collect');
-            elm = deq:push('a');
-            assert.are.equal( 1, deq.len );
-            deq:pop();
-
-            assert.are.equal( elm, deq:push('a') );
-            deq:pop();
-
-            assert.are.equal( 0, deq.len );
-        end);
-
-
-        it('pool property should be the weak-table', function()
-            local len = 0;
-
-            collectgarbage('collect');
-            deq:push('a');
-            deq:pop('a');
-            for _ in pairs( deq.pool ) do
-                len = len + 1;
-            end
-            assert.are.equal( 1, len );
-
-            collectgarbage('collect');
-            len = 0;
-            for _ in pairs( deq.pool ) do
-                len = len + 1;
-            end
-            assert.are.equal( 0, len );
         end);
     end);
 end);
