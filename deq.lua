@@ -26,7 +26,6 @@
 
 --]]
 --- file scope variables
-local next = next;
 local setmetatable = setmetatable;
 
 
@@ -35,17 +34,7 @@ local setmetatable = setmetatable;
 -- @param data
 -- @return elm
 local function createElement( deq, data )
-    local elm = next( deq.pool );
-
-    -- found at pool
-    if elm then
-        -- remove from pool
-        deq.pool[elm] = nil;
-        elm.data = data;
-    -- create new elm
-    else
-        elm = { data = data };
-    end
+    local elm = { data = data };
 
     -- add to used
     deq.used[elm] = true;
@@ -63,8 +52,6 @@ local function unrefElement( deq, elm )
     elm.next = nil;
     elm.data = nil;
     deq.used[elm] = nil;
-    -- add to pool
-    deq.pool[elm] = true;
 end
 
 
@@ -213,7 +200,6 @@ end
 local function new()
     return setmetatable({
         len = 0,
-        pool = setmetatable({},{ __mode = 'k' }),
         used = setmetatable({},{ __mode = 'k' })
     }, {
         __index = Deq
