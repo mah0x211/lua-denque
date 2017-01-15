@@ -106,33 +106,31 @@ static inline deq_elm_t *dq_newelm( lua_State *L )
     return elm;
 }
 
+#define dq_nounref(_a,_b)
 
-static inline void dq_pushdata( lua_State *L, deq_elm_t *elm )
-{
-    // check data type
-    switch( elm->type ){
-        // maintain reference
-        case LUA_TBOOLEAN:
-        case LUA_TLIGHTUSERDATA:
-        case LUA_TSTRING:
-        case LUA_TTABLE:
-        case LUA_TFUNCTION:
-        case LUA_TUSERDATA:
-        case LUA_TTHREAD:
-            lauxh_pushref( L, elm->data.ref );
-            lauxh_unref( L, elm->data.ref );
-            break;
-
-        // copy data
-        case LUA_TNUMBER:
-            lua_pushnumber( L, elm->data.num );
-            break;
-
-        // unsupported data
-        default:
-            luaL_error( L, "invalid implements" );
-    }
-}
+#define dq_pushdata( L, elm, unref_fn ) do{         \
+    /* check data type */                           \
+    switch( elm->type ){                            \
+        /* maintain reference */                    \
+        case LUA_TBOOLEAN:                          \
+        case LUA_TLIGHTUSERDATA:                    \
+        case LUA_TSTRING:                           \
+        case LUA_TTABLE:                            \
+        case LUA_TFUNCTION:                         \
+        case LUA_TUSERDATA:                         \
+        case LUA_TTHREAD:                           \
+            lauxh_pushref( L, elm->data.ref );      \
+            unref_fn( L, elm->data.ref );           \
+            break;                                  \
+        /* copy data */                             \
+        case LUA_TNUMBER:                           \
+            lua_pushnumber( L, elm->data.num );     \
+            break;                                  \
+        /* unsupported data */                      \
+        default:                                    \
+            luaL_error( L, "invalid implements" );  \
+    }                                               \
+}while(0)
 
 
 static int unshift_lua( lua_State *L )
@@ -204,7 +202,7 @@ static int shift_lua( lua_State *L )
     if( dq->head )
     {
         lauxh_unref( L, dq->head->ref );
-        dq_pushdata( L, dq->head );
+        dq_pushdata( L, dq->head, lauxh_unref );
 
         dq->len--;
         if( dq->len ){
@@ -229,7 +227,7 @@ static int pop_lua( lua_State *L )
     if( dq->tail )
     {
         lauxh_unref( L, dq->tail->ref );
-        dq_pushdata( L, dq->tail );
+        dq_pushdata( L, dq->tail, lauxh_unref );
 
         dq->len--;
         if( dq->len ){
@@ -252,7 +250,7 @@ static int remove_lua( lua_State *L )
     deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
     deq_elm_t *target = luaL_checkudata( L, 2, DEQ_ELM_MT );
 
-    dq_pushdata( L, target );
+    dq_pushdata( L, target, lauxh_unref );
     lauxh_unref( L, target->ref );
 
     if( dq->len == 1 ){
@@ -394,6 +392,16 @@ static int elm_prev_lua( lua_State *L )
 }
 
 
+static int elm_data_lua( lua_State *L )
+{
+    deq_elm_t *elm = luaL_checkudata( L, 1, DEQ_ELM_MT );
+
+    dq_pushdata( L, elm, dq_nounref );
+
+    return 1;
+}
+
+
 static void init_deq_elm_mt( lua_State *L )
 {
     struct luaL_Reg mmethods[] = {
@@ -401,6 +409,7 @@ static void init_deq_elm_mt( lua_State *L )
         { NULL, NULL }
     };
     struct luaL_Reg methods[] = {
+        { "data", elm_data_lua },
         { "prev", elm_prev_lua },
         { "next", elm_next_lua },
         { NULL, NULL }
