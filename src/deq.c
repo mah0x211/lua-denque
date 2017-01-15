@@ -38,7 +38,6 @@
 
 #define DEQ_MT            "deq"
 #define DEQ_ELM_MT        "deq.element"
-#define DEQ_WEAKTBL_MT    "deq.weaktbl"
 
 
 typedef union {
