@@ -24,7 +24,7 @@ returns a new `Deq` object.
 
 **Returns**
 
-- `deq:table`: deq object.
+- `deq:userdata`: deq object.
 
 **Example**
 
@@ -51,7 +51,7 @@ insert a data at front.
 
 **Returns**
 
-- `elm:table`: inserted element object.
+- `elm:userdata`: inserted element object.
 
 
 
@@ -67,7 +67,7 @@ insert a data at back.
 
 **Returns**
 
-- `elm:table`: inserted element object.
+- `elm:userdata`: inserted element object.
 
 
 
@@ -100,7 +100,7 @@ remove an element.
 
 **Parameters**
 
-- `elm:table`: an element.
+- `elm:userdata`: an element.
 
 
 **Returns**
