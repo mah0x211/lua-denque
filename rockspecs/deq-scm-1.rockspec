@@ -15,6 +15,13 @@ dependencies = {
 build = {
     type = "builtin",
     modules = {
-        deq = "deq.lua"
+        deq = {
+            incdirs = {
+                "deps/lauxhlib"
+            },
+            sources = {
+                "src/deq.c"
+            }
+        }
     }
 }
