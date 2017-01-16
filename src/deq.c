@@ -105,9 +105,8 @@ static inline deq_elm_t *dq_newelm( lua_State *L )
     return elm;
 }
 
-#define dq_nounref(_a,_b)
 
-#define dq_pushdata( L, elm, unref_fn ) do{         \
+#define dq_pushdata( L, elm ) do{                   \
     /* check data type */                           \
     switch( elm->type ){                            \
         /* maintain reference */                    \
@@ -119,7 +118,6 @@ static inline deq_elm_t *dq_newelm( lua_State *L )
         case LUA_TUSERDATA:                         \
         case LUA_TTHREAD:                           \
             lauxh_pushref( L, elm->data.ref );      \
-            unref_fn( L, elm->data.ref );           \
             break;                                  \
         /* copy data */                             \
         case LUA_TNUMBER:                           \
@@ -139,7 +137,7 @@ static int unshift_lua( lua_State *L )
 
     if( elm )
     {
-        if( dq->len ){
+        if( dq->len++ ){
             elm->next = dq->head;
             dq->head->prev = elm;
             dq->head = elm;
@@ -148,7 +146,6 @@ static int unshift_lua( lua_State *L )
             dq->head = dq->tail = elm;
         }
 
-        dq->len++;
         // return element
         lauxh_pushref( L, elm->ref );
 
@@ -170,7 +167,7 @@ static int push_lua( lua_State *L )
 
     if( elm )
     {
-        if( dq->len ){
+        if( dq->len++ ){
             elm->prev = dq->tail;
             dq->tail->next = elm;
             dq->tail = elm;
@@ -179,7 +176,6 @@ static int push_lua( lua_State *L )
             dq->head = dq->tail = elm;
         }
 
-        dq->len++;
         // return element
         lauxh_pushref( L, elm->ref );
 
@@ -194,28 +190,51 @@ static int push_lua( lua_State *L )
 }
 
 
+static inline int rmhead_lua( lua_State *L, deq_t *dq )
+{
+    if( dq->head )
+    {
+        dq->len--;
+        dq->head->ref = lauxh_unref( L, dq->head->ref );
+        dq_pushdata( L, dq->head );
+        dq->head = dq->head->next;
+        if( dq->head ){
+            dq->head->prev = NULL;
+        }
+    }
+    else {
+        lua_pushnil( L );
+    }
+
+    return 1;
+}
+
+
 static int shift_lua( lua_State *L )
 {
     deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
 
-    if( dq->head )
+    return rmhead_lua( L, dq );
+}
+
+
+static inline int rmtail_lua( lua_State *L, deq_t *dq )
+{
+    if( dq->tail )
     {
-        lauxh_unref( L, dq->head->ref );
-        dq_pushdata( L, dq->head, lauxh_unref );
-
         dq->len--;
-        if( dq->len ){
-            dq->head = dq->head->next;
-            dq->head->prev = NULL;
+        dq->tail->ref = lauxh_unref( L, dq->tail->ref );
+        dq_pushdata( L, dq->tail );
+        dq->tail = dq->tail->prev;
+        if( dq->tail ){
+            dq->tail->next = NULL;
         }
-        else {
-            dq->head = dq->tail = NULL;
-        }
-
-        return 1;
+    }
+    else {
+        lua_pushnil( L );
     }
 
-    return 0;
+    return 1;
 }
 
 
@@ -223,52 +242,33 @@ static int pop_lua( lua_State *L )
 {
     deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
 
-    if( dq->tail )
-    {
-        lauxh_unref( L, dq->tail->ref );
-        dq_pushdata( L, dq->tail, lauxh_unref );
-
-        dq->len--;
-        if( dq->len ){
-            dq->tail = dq->tail->prev;
-            dq->tail->next = NULL;
-        }
-        else {
-            dq->head = dq->tail = NULL;
-        }
-
-        return 1;
-    }
-
-    return 0;
+    return rmtail_lua( L, dq );
 }
 
 
 static int remove_lua( lua_State *L )
 {
     deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
-    deq_elm_t *target = luaL_checkudata( L, 2, DEQ_ELM_MT );
+    deq_elm_t *elm = luaL_checkudata( L, 2, DEQ_ELM_MT );
 
-    dq_pushdata( L, target, lauxh_unref );
-    lauxh_unref( L, target->ref );
+    if( elm->ref != LUA_NOREF )
+    {
+        if( elm == dq->head ){
+            return rmhead_lua( L, dq );
+        }
+        else if( elm == dq->tail ){
+            return rmtail_lua( L, dq );
+        }
 
-    if( dq->len == 1 ){
-        lauxh_unref( L, dq->head->ref );
-        dq->head = dq->tail = NULL;
-    }
-    else if( target == dq->head ){
-        dq->head = dq->head->next;
-        dq->head->prev = NULL;
-    }
-    else if( target == dq->tail ){
-        dq->tail = dq->tail->prev;
-        dq->tail->next = NULL;
+        dq->len--;
+        elm->ref = lauxh_unref( L, elm->ref );
+        dq_pushdata( L, elm );
+        elm->prev->next = elm->next;
+        elm->next->prev = elm->prev;
     }
     else {
-        target->prev->next = target->next;
-        target->next->prev = target->prev;
+        lua_pushnil( L );
     }
-    dq->len--;
 
     return 1;
 }
@@ -310,13 +310,6 @@ static int len_lua( lua_State *L )
 
     lua_pushinteger( L, dq->len );
 
-    return 1;
-}
-
-
-static int tostringelm_lua( lua_State *L )
-{
-    lua_pushfstring( L, DEQ_ELM_MT ": %p", lua_touserdata( L, 1 ) );
     return 1;
 }
 
@@ -395,16 +388,36 @@ static int elm_data_lua( lua_State *L )
 {
     deq_elm_t *elm = luaL_checkudata( L, 1, DEQ_ELM_MT );
 
-    dq_pushdata( L, elm, dq_nounref );
+    dq_pushdata( L, elm );
 
     return 1;
+}
+
+
+static int elm_tostring_lua( lua_State *L )
+{
+    lua_pushfstring( L, DEQ_ELM_MT ": %p", lua_touserdata( L, 1 ) );
+    return 1;
+}
+
+
+static int elm_gc_lua( lua_State *L )
+{
+    deq_elm_t *elm = luaL_checkudata( L, 1, DEQ_ELM_MT );
+
+    if( elm->type != LUA_TNUMBER ){
+        lauxh_unref( L, elm->data.ref );
+    }
+
+    return 0;
 }
 
 
 static void init_deq_elm_mt( lua_State *L )
 {
     struct luaL_Reg mmethods[] = {
-        { "__tostring", tostringelm_lua },
+        { "__gc", elm_gc_lua },
+        { "__tostring", elm_tostring_lua },
         { NULL, NULL }
     };
     struct luaL_Reg methods[] = {
