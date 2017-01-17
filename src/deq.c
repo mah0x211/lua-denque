@@ -45,9 +45,11 @@ typedef union {
     lua_Number num;
 } deq_data_u;
 
+typedef struct deq_st deq_t;
 typedef struct deq_elm_st deq_elm_t;
 
 struct deq_elm_st {
+    deq_t *dq;
     deq_elm_t *prev;
     deq_elm_t *next;
     int ref;
@@ -56,14 +58,14 @@ struct deq_elm_st {
 };
 
 
-typedef struct {
+struct deq_st {
     size_t len;
     deq_elm_t *head;
     deq_elm_t *tail;
-} deq_t;
+};
 
 
-static inline deq_elm_t *dq_newelm( lua_State *L )
+static inline deq_elm_t *dq_newelm( lua_State *L, deq_t *dq )
 {
     deq_elm_t *elm = NULL;
     int type = lua_type( L, 2 );
@@ -96,6 +98,7 @@ static inline deq_elm_t *dq_newelm( lua_State *L )
 
     if( ( elm = lua_newuserdata( L, sizeof( deq_elm_t ) ) ) ){
         lauxh_setmetatable( L, DEQ_ELM_MT );
+        elm->dq = dq;
         elm->prev = elm->next = NULL;
         elm->type = type;
         elm->data = data;
@@ -133,7 +136,7 @@ static inline deq_elm_t *dq_newelm( lua_State *L )
 static int unshift_lua( lua_State *L )
 {
     deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
-    deq_elm_t *elm = dq_newelm( L );
+    deq_elm_t *elm = dq_newelm( L, dq );
 
     if( elm )
     {
@@ -163,7 +166,7 @@ static int unshift_lua( lua_State *L )
 static int push_lua( lua_State *L )
 {
     deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
-    deq_elm_t *elm = dq_newelm( L );
+    deq_elm_t *elm = dq_newelm( L, dq );
 
     if( elm )
     {
@@ -323,12 +326,16 @@ static int tostring_lua( lua_State *L )
 
 static int gc_lua( lua_State *L )
 {
-    deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
-    deq_elm_t *elm = dq->head;
+    deq_t *dq = lua_touserdata( L, 1 );
 
-    while( elm ){
-        lauxh_unref( L, elm->ref );
-        elm = elm->next;
+    if( dq->len )
+    {
+        deq_elm_t *elm = dq->head;
+
+        do {
+            elm->ref = lauxh_unref( L, elm->ref );
+            elm = elm->next;
+        } while( elm );
     }
 
     return 0;
@@ -403,10 +410,14 @@ static int elm_tostring_lua( lua_State *L )
 
 static int elm_gc_lua( lua_State *L )
 {
-    deq_elm_t *elm = luaL_checkudata( L, 1, DEQ_ELM_MT );
+    deq_elm_t *elm = lua_touserdata( L, 1 );
 
-    if( elm->type != LUA_TNUMBER ){
-        lauxh_unref( L, elm->data.ref );
+    if( elm->ref != LUA_NOREF )
+    {
+        elm->dq->len--;
+        if( elm->type != LUA_TNUMBER ){
+            lauxh_unref( L, elm->data.ref );
+        }
     }
 
     return 0;
