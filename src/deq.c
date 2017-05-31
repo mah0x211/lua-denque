@@ -379,6 +379,14 @@ static int new_lua( lua_State *L )
 }
 
 
+static int elm_remove_lua( lua_State *L )
+{
+    deq_elm_t *elm = luaL_checkudata( L, 1, DEQ_ELM_MT );
+
+    return remove_elm_lua( L, elm->dq, elm );
+}
+
+
 static int elm_next_lua( lua_State *L )
 {
     deq_elm_t *elm = luaL_checkudata( L, 1, DEQ_ELM_MT );
@@ -453,6 +461,7 @@ static void init_deq_elm_mt( lua_State *L )
         { "data", elm_data_lua },
         { "prev", elm_prev_lua },
         { "next", elm_next_lua },
+        { "remove", elm_remove_lua },
         { NULL, NULL }
     };
     struct luaL_Reg *ptr = mmethods;
