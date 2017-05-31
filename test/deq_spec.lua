@@ -126,6 +126,48 @@ describe('Deque(Double-ended queue):', function()
             assert.are.equal( nil, deq:head() );
             assert.are.equal( nil, deq:tail() );
         end);
+
+        it('elm remove method should remove an element', function()
+            local a = deq:push('a');
+            local b = deq:push('b');
+            local c = deq:push('c');
+            local d = deq:push('d');
+            local e = deq:push('e');
+
+            assert.are.equal( 5, #deq );
+            assert.are.equal( a, deq:head() );
+            assert.are.equal( e, deq:tail() );
+            assert.are.equal( nil, e:next() );
+
+            assert.are.equal( 'b', b:remove() );
+            assert.are.equal( 4, #deq );
+            assert.are.equal( a, deq:head() );
+            assert.are.equal( e, deq:tail() );
+            assert.are.equal( c, a:next() );
+
+            assert.are.equal( 'a', a:remove() );
+            assert.are.equal( 3, #deq );
+            assert.are.equal( c, deq:head() );
+            assert.are.equal( e, deq:tail() );
+            assert.are.equal( nil, c:prev() );
+
+            assert.are.equal( 'e', e:remove() );
+            assert.are.equal( 2, #deq );
+            assert.are.equal( c, deq:head() );
+            assert.are.equal( d, deq:tail() );
+            assert.are.equal( nil, d:next() );
+
+            assert.are.equal( 'd', d:remove() );
+            assert.are.equal( 1, #deq );
+            assert.are.equal( c, deq:head() );
+            assert.are.equal( c, deq:tail() );
+            assert.are.equal( nil, c:next() );
+
+            assert.are.equal( 'c', c:remove() );
+            assert.are.equal( 0, #deq );
+            assert.are.equal( nil, deq:head() );
+            assert.are.equal( nil, deq:tail() );
+        end);
     end);
 end);
 
