@@ -24,7 +24,7 @@ returns a new `Deq` object.
 
 **Returns**
 
-- `deq:userdata`: deq object.
+- `deq:deq`: deq object.
 
 **Example**
 
@@ -34,6 +34,15 @@ local deq = require('deq').new();
 
 
 ---
+
+## Deq Properties
+
+
+### __len
+
+```
+local len = #deq;
+```
 
 
 ## Deq Methods
@@ -51,8 +60,16 @@ insert a data at front.
 
 **Returns**
 
-- `elm:userdata`: inserted element object.
+- `elm:deq.element`: inserted [element object](#deq-element-object).
 
+
+### elm = deq:head()
+
+examine first element.
+
+**Returns**
+
+- `elm:deq.element`: first [element object](#deq-element-object).
 
 
 ### elm = deq:push( data )
@@ -67,7 +84,17 @@ insert a data at back.
 
 **Returns**
 
-- `elm:userdata`: inserted element object.
+- `elm:deq.element`: inserted [element object](#deq-element-object).
+
+
+### elm = deq:tail()
+
+examine last element.
+
+
+**Returns**
+
+- `elm:deq.element`: last [element object](#deq-element-object).
 
 
 
@@ -100,10 +127,55 @@ remove an element.
 
 **Parameters**
 
-- `elm:userdata`: an element.
+- `elm:deq.element`: an element.
 
 
 **Returns**
 
 - `data`: a data
+
+
+## Deq Element Object
+
+
+### data = elm:data( [newdata] )
+
+set a data if newdata argument passed, and return a data of element.
+
+**Parameters**
+
+- `newdata`: a data.
+
+**Returns**
+
+- `data`: a data.
+
+
+### elm = elm:prev()
+
+get an previous element.
+
+**Returns**
+
+- `elm:deq.element`: previous [element object](#deq-element-object).
+
+
+### elm = elm:next()
+
+get a next element.
+
+
+**Returns**
+
+- `elm:deq.element`: next [element object](#deq-element-object).
+
+
+### data = elm:remove()
+
+remove element from deq then return data of element.
+
+
+**Returns**
+
+- `data`: a data.
 
