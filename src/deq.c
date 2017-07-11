@@ -421,6 +421,52 @@ static int elm_data_lua( lua_State *L )
 {
     deq_elm_t *elm = luaL_checkudata( L, 1, DEQ_ELM_MT );
 
+    // replace new data
+    if( lua_gettop( L ) > 1 )
+    {
+        int type = lua_type( L, 2 );
+        deq_data_u data;
+
+        switch( type ){
+            // maintain reference
+            case LUA_TBOOLEAN:
+            case LUA_TLIGHTUSERDATA:
+            case LUA_TSTRING:
+            case LUA_TTABLE:
+            case LUA_TFUNCTION:
+            case LUA_TUSERDATA:
+            case LUA_TTHREAD:
+                lua_settop( L, 2 );
+                data.ref = lauxh_ref( L );
+                break;
+
+            // copy data
+            case LUA_TNUMBER:
+                data.num = lua_tonumber( L, 2 );
+                break;
+
+            // unsupported data
+            default:
+                lauxh_argerror( L, 2, "cannot replace the data with a nil" );
+        }
+
+        // release old data reference
+        switch( elm->type ){
+            // maintain reference
+            case LUA_TBOOLEAN:
+            case LUA_TLIGHTUSERDATA:
+            case LUA_TSTRING:
+            case LUA_TTABLE:
+            case LUA_TFUNCTION:
+            case LUA_TUSERDATA:
+            case LUA_TTHREAD:
+                lauxh_unref( L, elm->data.ref );
+                break;
+        }
+
+        elm->data = data;
+    }
+
     dq_pushdata( L, elm, DEQ_DATA_RETAIN );
 
     return 1;
