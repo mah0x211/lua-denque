@@ -496,24 +496,13 @@ static int elm_gc_lua( lua_State *L )
 }
 
 
-static void init_deq_elm_mt( lua_State *L )
+static void init_mt( lua_State *L, const char *tname, struct luaL_Reg *mmethods,
+                     struct luaL_Reg *methods )
 {
-    struct luaL_Reg mmethods[] = {
-        { "__gc", elm_gc_lua },
-        { "__tostring", elm_tostring_lua },
-        { NULL, NULL }
-    };
-    struct luaL_Reg methods[] = {
-        { "data", elm_data_lua },
-        { "prev", elm_prev_lua },
-        { "next", elm_next_lua },
-        { "remove", elm_remove_lua },
-        { NULL, NULL }
-    };
     struct luaL_Reg *ptr = mmethods;
 
     // failed to create metatable
-    if( !luaL_newmetatable( L, DEQ_ELM_MT ) ){
+    if( luaL_newmetatable( L, tname ) ){
         luaL_error( L, "failed to create metatable " DEQ_ELM_MT );
     }
 
@@ -533,6 +522,26 @@ static void init_deq_elm_mt( lua_State *L )
     lua_rawset( L, -3 );
     // remove metatable from stack
     lua_pop( L, 1 );
+
+}
+
+
+static void init_deq_elm_mt( lua_State *L )
+{
+    struct luaL_Reg mmethods[] = {
+        { "__gc", elm_gc_lua },
+        { "__tostring", elm_tostring_lua },
+        { NULL, NULL }
+    };
+    struct luaL_Reg methods[] = {
+        { "data", elm_data_lua },
+        { "prev", elm_prev_lua },
+        { "next", elm_next_lua },
+        { "remove", elm_remove_lua },
+        { NULL, NULL }
+    };
+
+    init_mt( L, DEQ_ELM_MT, mmethods, methods );
 }
 
 
@@ -556,27 +565,7 @@ static void init_deq_mt( lua_State *L )
     };
     struct luaL_Reg *ptr = mmethods;
 
-    // failed to create metatable
-    if( !luaL_newmetatable( L, DEQ_MT ) ){
-        luaL_error( L, "failed to create metatable " DEQ_MT );
-    }
-
-    // metamethods
-    while( ptr->name ){
-        lauxh_pushfn2tbl( L, ptr->name, ptr->func );
-        ptr++;
-    }
-    // methods
-    ptr = methods;
-    lua_pushstring( L, "__index" );
-    lua_newtable( L );
-    while( ptr->name ){
-        lauxh_pushfn2tbl( L, ptr->name, ptr->func );
-        ptr++;
-    }
-    lua_rawset( L, -3 );
-    // remove metatable from stack
-    lua_pop( L, 1 );
+    init_mt( L, DEQ_MT, mmethods, methods );
 }
 
 
