@@ -499,30 +499,29 @@ static int elm_gc_lua( lua_State *L )
 static void init_mt( lua_State *L, const char *tname, struct luaL_Reg *mmethods,
                      struct luaL_Reg *methods )
 {
-    struct luaL_Reg *ptr = mmethods;
+    // create metatable
+    if( luaL_newmetatable( L, tname ) )
+    {
+        struct luaL_Reg *ptr = mmethods;
 
-    // failed to create metatable
-    if( luaL_newmetatable( L, tname ) ){
-        luaL_error( L, "failed to create metatable " DEQ_ELM_MT );
+        // metamethods
+        while( ptr->name ){
+            lauxh_pushfn2tbl( L, ptr->name, ptr->func );
+            ptr++;
+        }
+        // methods
+        ptr = methods;
+        lua_pushstring( L, "__index" );
+        lua_newtable( L );
+        while( ptr->name ){
+            lauxh_pushfn2tbl( L, ptr->name, ptr->func );
+            ptr++;
+        }
+        lua_rawset( L, -3 );
     }
 
-    // metamethods
-    while( ptr->name ){
-        lauxh_pushfn2tbl( L, ptr->name, ptr->func );
-        ptr++;
-    }
-    // methods
-    ptr = methods;
-    lua_pushstring( L, "__index" );
-    lua_newtable( L );
-    while( ptr->name ){
-        lauxh_pushfn2tbl( L, ptr->name, ptr->func );
-        ptr++;
-    }
-    lua_rawset( L, -3 );
     // remove metatable from stack
     lua_pop( L, 1 );
-
 }
 
 
