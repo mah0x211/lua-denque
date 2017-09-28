@@ -210,6 +210,9 @@ static inline int rmhead_lua( lua_State *L, deq_t *dq )
         if( dq->head ){
             dq->head->prev = NULL;
         }
+        else {
+            dq->tail = NULL;
+        }
     }
     else {
         lua_pushnil( L );
@@ -237,6 +240,9 @@ static inline int rmtail_lua( lua_State *L, deq_t *dq )
         dq->tail = dq->tail->prev;
         if( dq->tail ){
             dq->tail->next = NULL;
+        }
+        else {
+            dq->head = NULL;
         }
     }
     else {
