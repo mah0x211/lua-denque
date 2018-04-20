@@ -96,14 +96,13 @@ static inline deq_elm_t *dq_newelm( lua_State *L, deq_t *dq )
     }
 
 
-    if( ( elm = lua_newuserdata( L, sizeof( deq_elm_t ) ) ) ){
-        lauxh_setmetatable( L, DEQ_ELM_MT );
-        elm->dq = dq;
-        elm->prev = elm->next = NULL;
-        elm->type = type;
-        elm->data = data;
-        elm->ref = lauxh_ref( L );
-    }
+    elm = lua_newuserdata( L, sizeof( deq_elm_t ) );
+    lauxh_setmetatable( L, DEQ_ELM_MT );
+    elm->dq = dq;
+    elm->prev = elm->next = NULL;
+    elm->type = type;
+    elm->data = data;
+    elm->ref = lauxh_ref( L );
 
     return elm;
 }
@@ -144,28 +143,19 @@ static int unshift_lua( lua_State *L )
     deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
     deq_elm_t *elm = dq_newelm( L, dq );
 
-    if( elm )
-    {
-        if( dq->len++ ){
-            elm->next = dq->head;
-            dq->head->prev = elm;
-            dq->head = elm;
-        }
-        else {
-            dq->head = dq->tail = elm;
-        }
-
-        // return element
-        lauxh_pushref( L, elm->ref );
-
-        return 1;
+    if( dq->len++ ){
+        elm->next = dq->head;
+        dq->head->prev = elm;
+        dq->head = elm;
+    }
+    else {
+        dq->head = dq->tail = elm;
     }
 
-    // got error
-    lua_pushnil( L );
-    lua_pushstring( L, strerror( errno ) );
+    // return element
+    lauxh_pushref( L, elm->ref );
 
-    return 2;
+    return 1;
 }
 
 
@@ -174,28 +164,19 @@ static int push_lua( lua_State *L )
     deq_t *dq = luaL_checkudata( L, 1, DEQ_MT );
     deq_elm_t *elm = dq_newelm( L, dq );
 
-    if( elm )
-    {
-        if( dq->len++ ){
-            elm->prev = dq->tail;
-            dq->tail->next = elm;
-            dq->tail = elm;
-        }
-        else {
-            dq->head = dq->tail = elm;
-        }
-
-        // return element
-        lauxh_pushref( L, elm->ref );
-
-        return 1;
+    if( dq->len++ ){
+        elm->prev = dq->tail;
+        dq->tail->next = elm;
+        dq->tail = elm;
+    }
+    else {
+        dq->head = dq->tail = elm;
     }
 
-    // got error
-    lua_pushnil( L );
-    lua_pushstring( L, strerror( errno ) );
+    // return element
+    lauxh_pushref( L, elm->ref );
 
-    return 2;
+    return 1;
 }
 
 
@@ -370,18 +351,11 @@ static int new_lua( lua_State *L )
 {
     deq_t *dq = lua_newuserdata( L, sizeof( deq_t ) );
 
-    if( dq ){
-        lauxh_setmetatable( L, DEQ_MT );
-        dq->len = 0;
-        dq->head = dq->tail = NULL;
-        return 1;
-    }
+    lauxh_setmetatable( L, DEQ_MT );
+    dq->len = 0;
+    dq->head = dq->tail = NULL;
 
-    // got error
-    lua_pushnil( L );
-    lua_pushstring( L, strerror( errno ) );
-
-    return 2;
+    return 1;
 }
 
 
