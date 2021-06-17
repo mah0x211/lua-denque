@@ -1,7 +1,8 @@
+rockspec_format = "3.0"
 package = "deq"
 version = "scm-1"
 source = {
-    url = "gitrec://github.com/mah0x211/lua-deq.git"
+    url = "git+https://github.com/mah0x211/lua-deq.git"
 }
 description = {
     summary = "double-ended queue",
@@ -11,7 +12,6 @@ description = {
 }
 dependencies = {
     "lua >= 5.1",
-    "luarocks-fetch-gitrec >= 0.2"
 }
 build = {
     type = "builtin",
