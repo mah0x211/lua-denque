@@ -1,4 +1,4 @@
-lua-deq
+lua-deque
 ===
 
 [![test](https://github.com/mah0x211/lua-deque/actions/workflows/test.yml/badge.svg)](https://github.com/mah0x211/lua-deque/actions/workflows/test.yml)
@@ -16,7 +16,7 @@ luarocks install deque
 ***
 
 
-## Create a Deq Object.
+## Create a `deque` object.
 
 ### dq = deque.new()
 
