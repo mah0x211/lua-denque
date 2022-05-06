@@ -20,22 +20,10 @@
  *  DEALINGS IN THE SOFTWARE.
  **/
 
-#include "lauxhlib.h"
-#include <errno.h>
-#include <lauxlib.h>
-#include <lua.h>
-#include <math.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include <lauxhlib.h>
 
 #define DEQ_MT     "deque"
 #define DEQ_ELM_MT "deque.element"
-
-typedef union {
-    int ref;
-    lua_Number num;
-} deq_data_u;
 
 typedef struct deq_st deq_t;
 typedef struct deq_elm_st deq_elm_t;
@@ -80,11 +68,12 @@ static inline deq_elm_t *dq_newelm(lua_State *L, deq_t *dq)
     int data       = checkdata(L, 2);
     deq_elm_t *elm = lua_newuserdata(L, sizeof(deq_elm_t));
 
-    lauxh_setmetatable(L, DEQ_ELM_MT);
     elm->dq   = dq;
-    elm->prev = elm->next = NULL;
-    elm->data             = data;
-    elm->ref              = lauxh_ref(L);
+    elm->prev = NULL;
+    elm->next = NULL;
+    elm->data = data;
+    lauxh_setmetatable(L, DEQ_ELM_MT);
+    elm->ref = lauxh_ref(L);
 
     return elm;
 }
@@ -257,16 +246,13 @@ static int tostring_lua(lua_State *L)
 
 static int gc_lua(lua_State *L)
 {
-    deq_t *dq = lua_touserdata(L, 1);
+    deq_t *dq      = lua_touserdata(L, 1);
+    deq_elm_t *elm = dq->head;
 
-    if (dq->len) {
-        deq_elm_t *elm = dq->head;
-
-        do {
-            elm->ref = lauxh_unref(L, elm->ref);
-            lauxh_unref(L, elm->data);
-            elm = elm->next;
-        } while (elm);
+    while (elm) {
+        elm->ref  = lauxh_unref(L, elm->ref);
+        elm->data = lauxh_unref(L, elm->data);
+        elm       = elm->next;
     }
 
     return 0;
@@ -343,8 +329,7 @@ static int elm_gc_lua(lua_State *L)
 {
     deq_elm_t *elm = lua_touserdata(L, 1);
 
-    if (elm->ref != LUA_NOREF) {
-        elm->dq->len--;
+    if (elm->data != LUA_NOREF) {
         lauxh_unref(L, elm->data);
     }
 

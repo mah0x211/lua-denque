@@ -11,7 +11,7 @@ Double-ended queue module.
 ## Installation
 
 ```sh
-luarocks install deque
+luarocks install mah0x211/deque
 ```
 ***
 
