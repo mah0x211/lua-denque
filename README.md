@@ -1,181 +1,171 @@
 lua-deq
 ===
 
+[![test](https://github.com/mah0x211/lua-deque/actions/workflows/test.yml/badge.svg)](https://github.com/mah0x211/lua-deque/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/mah0x211/lua-deque/branch/master/graph/badge.svg)](https://codecov.io/gh/mah0x211/lua-deque)
+
+
 Double-ended queue module.
-
-
-***
 
 
 ## Installation
 
 ```sh
-luarocks install deq --from=http://mah0x211.github.io/rocks/
+luarocks install deque
 ```
-
----
+***
 
 
 ## Create a Deq Object.
 
-### deq = deq.new()
+### dq = deque.new()
 
-returns a new `Deq` object.
+returns a new `deque` object.
 
 **Returns**
 
-- `deq:deq`: deq object.
+- `deq:deque`: a `deque` object.
 
 **Example**
 
 ```lua
-local deq = require('deq').new();
+local deque = require('deq')
+local dq = deque.new()
 ```
 
 
----
+## n = #deque
 
-## Deq Properties
+get number of elements held in the `deque` object.
 
-
-### __len
-
+```lua
+local deque = require('deq')
+local dq = deque.new()
+local len = #dq
 ```
-local len = #deq;
-```
+
+**Returns**
+
+- `n:integer`: number of items held in the `deque` object.
 
 
-## Deq Methods
+## elm = deque:unshift( data )
 
-
-### elm = deq:unshift( data )
-
-insert a data at front.
-
+insert data at the head.
 
 **Parameters**
 
-- `data`: a data.
-
-
-**Returns**
-
-- `elm:deq.element`: inserted [element object](#deq-element-object).
-
-
-### elm = deq:head()
-
-examine first element.
+- `data:any`: a non-nil data.
 
 **Returns**
 
-- `elm:deq.element`: first [element object](#deq-element-object).
+- `elm:deque.element`: inserted `deque.element` object.
 
 
-### elm = deq:push( data )
+## elm = deque:head()
 
-insert a data at back.
+get the head element.
 
+**Returns**
+
+- `elm:deque.element`: `deque.element` object.
+
+
+## elm = deque:push( data )
+
+insert data at the tail.
 
 **Parameters**
 
-- `data`: a data.
+- `data:any`: a non-nil data.
 
 
 **Returns**
 
-- `elm:deq.element`: inserted [element object](#deq-element-object).
+- `elm:deque.element`: inserted `deque.element` object.
 
 
-### elm = deq:tail()
+## elm = deque:tail()
 
-examine last element.
-
-
-**Returns**
-
-- `elm:deq.element`: last [element object](#deq-element-object).
-
-
-
-### data = deq:shift()
-
-remove first data.
-
+get the tail element.
 
 **Returns**
 
-- `data`: a data
+- `elm:deque.element`: `deque.element` object.
 
 
+## data = deque:shift()
 
-### data = deq:pop()
-
-remove last data.
-
+remove the head element and return the data held by the head element.
 
 **Returns**
 
-- `data`: a data
+- `data:any`: a data.
 
 
+## data = deque:pop()
 
-### data = deq:remove( elm )
+remove the tail element and return the data held by the tail element.
 
-remove an element.
+**Returns**
 
+- `data:any`: a data.
+
+
+## data = deque:remove( elm )
+
+remove the specified element and return the data held by the specified element.
 
 **Parameters**
 
-- `elm:deq.element`: an element.
+- `elm:deque.element`: `deque.element` object.
 
-
-**Returns**
-
-- `data`: a data
-
-
-## Deq Element Object
-
-
-### data = elm:data( [newdata] )
-
-set a data if newdata argument passed, and return a data of element.
-
-**Parameters**
-
-- `newdata`: a data.
 
 **Returns**
 
 - `data`: a data.
 
 
-### elm = elm:prev()
-
-get an previous element.
-
-**Returns**
-
-- `elm:deq.element`: previous [element object](#deq-element-object).
+## `deque.element` object
 
 
-### elm = elm:next()
+## data = elm:data( [newdata] )
 
-get a next element.
+set a newdata if `newdata` argument passed, and return a data held in element.
 
+**Parameters**
 
-**Returns**
-
-- `elm:deq.element`: next [element object](#deq-element-object).
-
-
-### data = elm:remove()
-
-remove element from deq then return data of element.
-
+- `newdata:any`: a non-nil data.
 
 **Returns**
 
 - `data`: a data.
+
+
+## elm = elm:prev()
+
+get an previous `deque.element` object.
+
+**Returns**
+
+- `elm:deque.element`: previous `deque.element` object.
+
+
+## elm = elm:next()
+
+get a next `deque.element` object.
+
+
+**Returns**
+
+- `elm:deq.element`: next `deque.element` object.
+
+
+## data = elm:remove()
+
+remove element from associated deque and return the data held by the element.
+
+**Returns**
+
+- `data:any`: a data.
 
