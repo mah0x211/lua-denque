@@ -8,6 +8,13 @@ function testcase.new()
     assert.equal(#dq, 0);
     assert.is_nil(dq:head())
     assert.is_nil(dq:tail())
+
+    -- test that create new deque object by __call metamethod
+    dq = assert(deque())
+    assert.match(tostring(dq), 'deque: ')
+    assert.equal(#dq, 0);
+    assert.is_nil(dq:head())
+    assert.is_nil(dq:tail())
 end
 
 function testcase.unshift()

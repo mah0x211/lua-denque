@@ -1,6 +1,7 @@
 TARGET=$(PACKAGE).$(LIB_EXTENSION)
 SRC=$(wildcard src/*.c)
 OBJ=$(SRC:.c=.o)
+GCDAS=$(OBJ:.o=.gcda)
 INSTALL?=install
 
 ifdef DEQUE_COVERAGE
@@ -20,5 +21,4 @@ $(TARGET): $(OBJ)
 
 install:
 	$(INSTALL) $(TARGET) $(LIBDIR)
-	rm -f $(OBJ)
-	rm -f $(TARGET)
+	rm -f $(OBJ) $(TARGET) $(GCDAS)
