@@ -411,6 +411,9 @@ LUALIB_API int luaopen_deque(lua_State *L)
     // register allocator
     lua_createtable(L, 0, 1);
     lauxh_pushfn2tbl(L, "new", new_lua);
+    lua_createtable(L, 0, 1);
+    lauxh_pushfn2tbl(L, "__call", new_lua);
+    lua_setmetatable(L, -2);
 
     return 1;
 }

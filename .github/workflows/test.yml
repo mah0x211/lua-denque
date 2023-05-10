@@ -42,7 +42,7 @@ jobs:
         submodules: 'true'
     -
       name: Setup Lua ${{ matrix.lua-version }}
-      uses: leafo/gh-actions-lua@v8.0.0
+      uses: leafo/gh-actions-lua@v8
       with:
         luaVersion: ${{ matrix.lua-version }}
     -
@@ -64,10 +64,10 @@ jobs:
     -
       name: Generate coverage reports
       run: |
-        sh ./covergen.sh
+        sh ./covgen.sh
     -
       name: Upload c coverage to Codecov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with:
         files: ./coverage/lcov.info
         flags: unittests
