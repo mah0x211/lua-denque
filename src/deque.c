@@ -29,14 +29,15 @@ typedef struct deq_st deq_t;
 typedef struct deq_elm_st deq_elm_t;
 
 struct deq_elm_st {
+    intptr_t intptr;
     deq_t *dq;
     deq_elm_t *prev;
     deq_elm_t *next;
-    int ref;
     int data;
 };
 
 struct deq_st {
+    int ref;
     size_t len;
     deq_elm_t *head;
     deq_elm_t *tail;
@@ -68,14 +69,29 @@ static inline deq_elm_t *dq_newelm(lua_State *L, deq_t *dq)
     int data       = checkdata(L, 2);
     deq_elm_t *elm = lua_newuserdata(L, sizeof(deq_elm_t));
 
-    elm->dq   = dq;
-    elm->prev = NULL;
-    elm->next = NULL;
-    elm->data = data;
+    elm->intptr = (intptr_t)elm;
+    elm->dq     = dq;
+    elm->prev   = NULL;
+    elm->next   = NULL;
+    elm->data   = data;
     lauxh_setmetatable(L, DEQ_ELM_MT);
-    elm->ref = lauxh_ref(L);
+    // keep reference in table
+    lauxh_pushref(L, dq->ref);
+    lua_pushvalue(L, -2);
+    lua_rawseti(L, -2, elm->intptr);
+    lua_pop(L, 1);
 
     return elm;
+}
+
+static inline void release_elm(lua_State *L, deq_elm_t *elm)
+{
+    // remove reference from table
+    lauxh_pushref(L, elm->dq->ref);
+    lua_pushnil(L);
+    lua_rawseti(L, -2, elm->intptr);
+    lua_pop(L, 1);
+    elm->intptr = 0;
 }
 
 static int unshift_lua(lua_State *L)
@@ -92,8 +108,6 @@ static int unshift_lua(lua_State *L)
     }
 
     // return element
-    lauxh_pushref(L, elm->ref);
-
     return 1;
 }
 
@@ -111,8 +125,6 @@ static int push_lua(lua_State *L)
     }
 
     // return element
-    lauxh_pushref(L, elm->ref);
-
     return 1;
 }
 
@@ -122,7 +134,7 @@ static inline int rmhead_lua(lua_State *L, deq_t *dq)
         dq->len--;
         lauxh_pushref(L, dq->head->data);
         dq->head->data = lauxh_unref(L, dq->head->data);
-        dq->head->ref  = lauxh_unref(L, dq->head->ref);
+        release_elm(L, dq->head);
 
         dq->head = dq->head->next;
         if (dq->head) {
@@ -150,7 +162,8 @@ static inline int rmtail_lua(lua_State *L, deq_t *dq)
         dq->len--;
         lauxh_pushref(L, dq->tail->data);
         dq->tail->data = lauxh_unref(L, dq->tail->data);
-        dq->tail->ref  = lauxh_unref(L, dq->tail->ref);
+        // remove reference from table
+        release_elm(L, dq->tail);
 
         dq->tail = dq->tail->prev;
         if (dq->tail) {
@@ -174,7 +187,7 @@ static int pop_lua(lua_State *L)
 
 static inline int remove_elm_lua(lua_State *L, deq_t *dq, deq_elm_t *elm)
 {
-    if (elm->ref != LUA_NOREF) {
+    if (elm->intptr) {
         if (elm == dq->head) {
             return rmhead_lua(L, dq);
         } else if (elm == dq->tail) {
@@ -184,7 +197,8 @@ static inline int remove_elm_lua(lua_State *L, deq_t *dq, deq_elm_t *elm)
         dq->len--;
         lauxh_pushref(L, elm->data);
         elm->data = lauxh_unref(L, elm->data);
-        elm->ref  = lauxh_unref(L, elm->ref);
+        // remove reference from table
+        release_elm(L, elm);
 
         elm->prev->next = elm->next;
         elm->next->prev = elm->prev;
@@ -203,12 +217,20 @@ static int remove_lua(lua_State *L)
     return remove_elm_lua(L, dq, elm);
 }
 
+static inline void push_elm(lua_State *L, deq_elm_t *elm)
+{
+    // get element from table
+    lauxh_pushref(L, elm->dq->ref);
+    lua_rawgeti(L, -1, elm->intptr);
+    lua_replace(L, -2);
+}
+
 static int tail_lua(lua_State *L)
 {
     deq_t *dq = luaL_checkudata(L, 1, DEQ_MT);
 
     if (dq->tail) {
-        lauxh_pushref(L, dq->tail->ref);
+        push_elm(L, dq->tail);
     } else {
         lua_pushnil(L);
     }
@@ -221,7 +243,7 @@ static int head_lua(lua_State *L)
     deq_t *dq = luaL_checkudata(L, 1, DEQ_MT);
 
     if (dq->head) {
-        lauxh_pushref(L, dq->head->ref);
+        push_elm(L, dq->head);
     } else {
         lua_pushnil(L);
     }
@@ -246,15 +268,8 @@ static int tostring_lua(lua_State *L)
 
 static int gc_lua(lua_State *L)
 {
-    deq_t *dq      = lua_touserdata(L, 1);
-    deq_elm_t *elm = dq->head;
-
-    while (elm) {
-        elm->ref  = lauxh_unref(L, elm->ref);
-        elm->data = lauxh_unref(L, elm->data);
-        elm       = elm->next;
-    }
-
+    deq_t *dq = lua_touserdata(L, 1);
+    lauxh_unref(L, dq->ref);
     return 0;
 }
 
@@ -265,6 +280,8 @@ static int new_lua(lua_State *L)
     lauxh_setmetatable(L, DEQ_MT);
     dq->len  = 0;
     dq->head = dq->tail = NULL;
+    lua_newtable(L);
+    dq->ref = lauxh_ref(L);
 
     return 1;
 }
@@ -281,7 +298,7 @@ static int elm_next_lua(lua_State *L)
     deq_elm_t *elm = luaL_checkudata(L, 1, DEQ_ELM_MT);
 
     if (elm->next) {
-        lauxh_pushref(L, elm->next->ref);
+        push_elm(L, elm->next);
     } else {
         lua_pushnil(L);
     }
@@ -294,7 +311,7 @@ static int elm_prev_lua(lua_State *L)
     deq_elm_t *elm = luaL_checkudata(L, 1, DEQ_ELM_MT);
 
     if (elm->prev) {
-        lauxh_pushref(L, elm->prev->ref);
+        push_elm(L, elm->prev);
     } else {
         lua_pushnil(L);
     }
