@@ -1,11 +1,11 @@
-package = "deque"
+package = "denque"
 version = "scm-1"
 source = {
-    url = "git+https://github.com/mah0x211/lua-deque.git"
+    url = "git+https://github.com/mah0x211/lua-denque.git"
 }
 description = {
     summary = "double-ended queue",
-    homepage = "https://github.com/mah0x211/lua-deque",
+    homepage = "https://github.com/mah0x211/lua-denque",
     license = "MIT/X11",
     maintainer = "Masatoshi Fukunaga"
 }
@@ -16,16 +16,16 @@ dependencies = {
 build = {
     type = "make",
     build_variables = {
-        PACKAGE         = "deque",
+        PACKAGE         = "denque",
         CFLAGS          = "$(CFLAGS)",
         WARNINGS        = "-Wall -Wno-trigraphs -Wmissing-field-initializers -Wreturn-type -Wmissing-braces -Wparentheses -Wno-switch -Wunused-function -Wunused-label -Wunused-parameter -Wunused-variable -Wunused-value -Wuninitialized -Wunknown-pragmas -Wshadow -Wsign-compare",
         CPPFLAGS        = "-I$(LUA_INCDIR)",
         LDFLAGS         = "$(LIBFLAG)",
         LIB_EXTENSION   = "$(LIB_EXTENSION)",
-        DEQUE_COVERAGE  = "$(DEQUE_COVERAGE)",
+        DENQUE_COVERAGE  = "$(DENQUE_COVERAGE)",
     },
     install_variables = {
-        PACKAGE         = "deque",
+        PACKAGE         = "denque",
         LIB_EXTENSION   = "$(LIB_EXTENSION)",
         CONFDIR         = '$(CONFDIR)',
         LIBDIR          = "$(LIBDIR)",

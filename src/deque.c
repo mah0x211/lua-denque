@@ -22,8 +22,8 @@
 
 #include <lauxhlib.h>
 
-#define DEQ_MT     "deque"
-#define DEQ_ELM_MT "deque.element"
+#define DEQ_MT     "denque"
+#define DEQ_ELM_MT "denque.element"
 
 typedef struct deq_st deq_t;
 typedef struct deq_elm_st deq_elm_t;
@@ -420,7 +420,7 @@ static void init_deq_mt(lua_State *L)
     init_mt(L, DEQ_MT, mmethods, methods);
 }
 
-LUALIB_API int luaopen_deque(lua_State *L)
+LUALIB_API int luaopen_denque(lua_State *L)
 {
     init_deq_mt(L);
     init_deq_elm_mt(L);
