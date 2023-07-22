@@ -1,8 +1,8 @@
-lua-deque
+lua-denque
 ===
 
-[![test](https://github.com/mah0x211/lua-deque/actions/workflows/test.yml/badge.svg)](https://github.com/mah0x211/lua-deque/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/mah0x211/lua-deque/branch/master/graph/badge.svg)](https://codecov.io/gh/mah0x211/lua-deque)
+[![test](https://github.com/mah0x211/lua-denque/actions/workflows/test.yml/badge.svg)](https://github.com/mah0x211/lua-denque/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/mah0x211/lua-denque/branch/master/graph/badge.svg)](https://codecov.io/gh/mah0x211/lua-denque)
 
 
 Double-ended queue module.
@@ -11,45 +11,45 @@ Double-ended queue module.
 ## Installation
 
 ```sh
-luarocks install mah0x211/deque
+luarocks install denque
 ```
 ***
 
 
-## Create a `deque` object.
+## Create a `denque` object.
 
-### dq = deque.new()
+### dq = denque.new()
 
-returns a new `deque` object.
+returns a new `denque` object.
 
 **Returns**
 
-- `deq:deque`: a `deque` object.
+- `deq:denque`: a `denque` object.
 
 **Example**
 
 ```lua
-local deque = require('deq')
-local dq = deque.new()
+local denque = require('deq')
+local dq = denque.new()
 ```
 
 
-## n = #deque
+## n = #denque
 
-get number of elements held in the `deque` object.
+get number of elements held in the `denque` object.
 
 ```lua
-local deque = require('deq')
-local dq = deque.new()
+local denque = require('deq')
+local dq = denque.new()
 local len = #dq
 ```
 
 **Returns**
 
-- `n:integer`: number of items held in the `deque` object.
+- `n:integer`: number of items held in the `denque` object.
 
 
-## elm = deque:unshift( data )
+## elm = denque:unshift( data )
 
 insert data at the head.
 
@@ -59,19 +59,19 @@ insert data at the head.
 
 **Returns**
 
-- `elm:deque.element`: inserted `deque.element` object.
+- `elm:denque.element`: inserted `denque.element` object.
 
 
-## elm = deque:head()
+## elm = denque:head()
 
 get the head element.
 
 **Returns**
 
-- `elm:deque.element`: `deque.element` object.
+- `elm:denque.element`: `denque.element` object.
 
 
-## elm = deque:push( data )
+## elm = denque:push( data )
 
 insert data at the tail.
 
@@ -82,19 +82,19 @@ insert data at the tail.
 
 **Returns**
 
-- `elm:deque.element`: inserted `deque.element` object.
+- `elm:denque.element`: inserted `denque.element` object.
 
 
-## elm = deque:tail()
+## elm = denque:tail()
 
 get the tail element.
 
 **Returns**
 
-- `elm:deque.element`: `deque.element` object.
+- `elm:denque.element`: `denque.element` object.
 
 
-## data = deque:shift()
+## data = denque:shift()
 
 remove the head element and return the data held by the head element.
 
@@ -103,7 +103,7 @@ remove the head element and return the data held by the head element.
 - `data:any`: a data.
 
 
-## data = deque:pop()
+## data = denque:pop()
 
 remove the tail element and return the data held by the tail element.
 
@@ -112,13 +112,13 @@ remove the tail element and return the data held by the tail element.
 - `data:any`: a data.
 
 
-## data = deque:remove( elm )
+## data = denque:remove( elm )
 
 remove the specified element and return the data held by the specified element.
 
 **Parameters**
 
-- `elm:deque.element`: `deque.element` object.
+- `elm:denque.element`: `denque.element` object.
 
 
 **Returns**
@@ -126,7 +126,7 @@ remove the specified element and return the data held by the specified element.
 - `data`: a data.
 
 
-## `deque.element` object
+## `denque.element` object
 
 
 ## data = elm:data( [newdata] )
@@ -144,26 +144,26 @@ set a newdata if `newdata` argument passed, and return a data held in element.
 
 ## elm = elm:prev()
 
-get an previous `deque.element` object.
+get an previous `denque.element` object.
 
 **Returns**
 
-- `elm:deque.element`: previous `deque.element` object.
+- `elm:denque.element`: previous `denque.element` object.
 
 
 ## elm = elm:next()
 
-get a next `deque.element` object.
+get a next `denque.element` object.
 
 
 **Returns**
 
-- `elm:deq.element`: next `deque.element` object.
+- `elm:deq.element`: next `denque.element` object.
 
 
 ## data = elm:remove()
 
-remove element from associated deque and return the data held by the element.
+remove element from associated denque and return the data held by the element.
 
 **Returns**
 

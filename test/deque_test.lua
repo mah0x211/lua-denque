@@ -1,28 +1,28 @@
 local testcase = require('testcase')
-local deque = require('deque')
+local denque = require('denque')
 
 function testcase.new()
-    -- test that create new deque object
-    local dq = assert(deque.new())
-    assert.match(tostring(dq), 'deque: ')
+    -- test that create new denque object
+    local dq = assert(denque.new())
+    assert.match(tostring(dq), 'denque: ')
     assert.equal(#dq, 0);
     assert.is_nil(dq:head())
     assert.is_nil(dq:tail())
 
-    -- test that create new deque object by __call metamethod
-    dq = assert(deque())
-    assert.match(tostring(dq), 'deque: ')
+    -- test that create new denque object by __call metamethod
+    dq = assert(denque())
+    assert.match(tostring(dq), 'denque: ')
     assert.equal(#dq, 0);
     assert.is_nil(dq:head())
     assert.is_nil(dq:tail())
 end
 
 function testcase.unshift()
-    local dq = assert(deque.new())
+    local dq = assert(denque.new())
 
     -- test that insert a data at the head
     local a = dq:unshift('a')
-    assert.match(tostring(a), 'deque.element: ')
+    assert.match(tostring(a), 'denque.element: ')
     assert.equal(dq:head(), a)
     assert.equal(dq:tail(), a)
 
@@ -37,11 +37,11 @@ function testcase.unshift()
 end
 
 function testcase.push()
-    local dq = assert(deque.new())
+    local dq = assert(denque.new())
 
     -- test that insert a data at the tail
     local a = dq:push('a')
-    assert.match(tostring(a), 'deque.element: ')
+    assert.match(tostring(a), 'denque.element: ')
     assert.equal(dq:head(), a)
     assert.equal(dq:tail(), a)
 
@@ -52,7 +52,7 @@ function testcase.push()
 end
 
 function testcase.shift()
-    local dq = assert(deque.new())
+    local dq = assert(denque.new())
     dq:unshift('a');
     dq:unshift('b');
 
@@ -66,7 +66,7 @@ function testcase.shift()
 end
 
 function testcase.pop()
-    local dq = assert(deque.new())
+    local dq = assert(denque.new())
     dq:push('a')
     dq:push('b')
 
@@ -80,7 +80,7 @@ function testcase.pop()
 end
 
 function testcase.remove()
-    local dq = assert(deque.new())
+    local dq = assert(denque.new())
     local a = dq:push('a')
     local b = dq:push('b')
     local c = dq:push('c')
@@ -137,7 +137,7 @@ function testcase.remove()
 end
 
 function testcase.elm_remove()
-    local dq = assert(deque.new())
+    local dq = assert(denque.new())
     local a = dq:push('a')
     local b = dq:push('b')
     local c = dq:push('c')
@@ -191,7 +191,7 @@ function testcase.elm_remove()
 end
 
 function testcase.elm_data()
-    local dq = assert(deque.new())
+    local dq = assert(denque.new())
     local a = dq:push('a')
 
     -- test that return a data

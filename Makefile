@@ -4,7 +4,7 @@ OBJ=$(SRC:.c=.o)
 GCDAS=$(OBJ:.o=.gcda)
 INSTALL?=install
 
-ifdef DEQUE_COVERAGE
+ifdef DENQUE_COVERAGE
 COVFLAGS=--coverage
 endif
 

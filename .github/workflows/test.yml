@@ -56,7 +56,7 @@ jobs:
     -
       name: Install
       run: |
-        luarocks make rockspecs/deque-scm-1.rockspec DEQUE_COVERAGE=1
+        luarocks make rockspecs/denque-scm-1.rockspec DENQUE_COVERAGE=1
     -
       name: Run Test
       run: |
