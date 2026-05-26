@@ -20,7 +20,12 @@
  *  DEALINGS IN THE SOFTWARE.
  **/
 
-#include <lauxhlib.h>
+// depend
+#include "lauxhlib.h"
+// lua
+#include <lauxlib.h>
+// system
+#include <stdint.h>
 
 #define DEQ_MT     "denque"
 #define DEQ_ELM_MT "denque.element"
